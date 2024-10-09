@@ -1,2 +1,2 @@
 # PRGS-Intro-to-ML-2024
-HWs repo
+## This repo is mainly for submitting my HWs for this class
