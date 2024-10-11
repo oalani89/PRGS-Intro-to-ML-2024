@@ -17,4 +17,4 @@ todays_date = date.today()
 todays_date
 ```
 
-Today's date is: `{{todays_date}}`.
+Today's date is: `todays_date`.
