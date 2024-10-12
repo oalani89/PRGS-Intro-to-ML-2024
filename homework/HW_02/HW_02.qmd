@@ -24,29 +24,90 @@ For this assignment, you will practice downloadings, cleaning, and analyzing dat
 ## Task 1 - NRI Data Cleaning
 
 __1. Import the NRI data. Ensure that the [FIPS code](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standard_state_code) variable ('STCOFIPS') is correctly identified as a string / character variable. Otherwise, the leading zeros will be removed.__
-
-```
+```{Python}
 # your code here
+import pandas as pd
+
+file_path = 'data/raw/NRI_Table_Counties/NRI_Table_Counties.csv'  
+
+# Load the CSV data and ensure 'STCOFIPS' is read as a string
+nri_data = pd.read_csv(file_path, dtype={'STCOFIPS': str})
+
+# Preview the data to confirm all works
+# print(nri_data.head()) 
+
+
 ```
 
 __2. Subset the NRI data to include only the 5-digit state/county FIPS code and all colums ending with '\_AFREQ' and '\_RISKR'. Each of these columns represents a different hazard type.__
+```{Python}
+# Select columns that end with '_AFREQ' or '_RISKR'
+afreq_columns = [col for col in nri_df.columns if col.endswith('_AFREQ')]
+riskr_columns = [col for col in nri_df.columns if col.endswith('_RISKR')]
+
+# Combine the selected columns and include 'STCOFIPS'
+selected_columns = ['STCOFIPS'] + afreq_columns + riskr_columns
+
+# Subset the dataframe
+nri_subset = nri_df[selected_columns]
+
+# Preview 
+# print(nri_subset.head())
 
 ```
-# your code here
-```
+
 __3. Create a table / dataframe that, for each hazard type, shows the number of missing values in the '\_AFREQ' and '\_RISKR' columns.__
-```
+```{Python}
 # your code here
-```
-__4. Show the cross-tabulation of the 'AVLN_AFREQ' and 'AVLN_RISKR' columns (including missing values). What do you observe?__
-```
-# your code here
-```
-__5. Assuming that a risk that is "not applicable" to a county has an annualized frequency of 0, impute the relevant missing values in the '\_AFREQ' columns with 0.__
-```
-# your code here
+
+# Step 3: Create a table/dataframe that shows the number of missing values in the '_AFREQ' and '_RISKR' columns for each hazard type.
+
+# Get hazard types by removing '_AFREQ' suffix from afreq_columns
+hazard_types = [col.replace('_AFREQ', '') for col in afreq_columns]
+
+# Initialize a list to store the counts
+missing_values = []
+
+# Loop through each hazard type
+for hazard in hazard_types:
+    afreq_col = f"{hazard}_AFREQ"
+    riskr_col = f"{hazard}_RISKR"
+    
+    afreq_missing = nri_subset[afreq_col].isnull().sum()
+    riskr_missing = nri_subset[riskr_col].isnull().sum()
+    
+    missing_values.append({
+        'Hazard': hazard,
+        'Missing_AFREQ': afreq_missing,
+        'Missing_RISKR': riskr_missing
+    })
+
+# Create a DataFrame from the list
+missing_df = pd.DataFrame(missing_values)
+
+# Display the DataFrame
+print(missing_df)
+# print(nri_subset.isnull().sum().sum()) # just to fonfirm the total sum of missing values is same as above 
 ```
 
+__4. Show the cross-tabulation of the 'AVLN_AFREQ' and 'AVLN_RISKR' columns (including missing values). What do you observe?__
+```{Python}
+cross_tab = pd.crosstab(nri_subset['AVLN_AFREQ'], nri_subset['AVLN_RISKR'], dropna=False)
+print(cross_tab) # we notice here when fequency increases risk level increases as well
+cross_tab
+```
+Missing table: `{Python} x`.
+
+__5. Assuming that a risk that is "not applicable" to a county has an annualized frequency of 0, impute the relevant missing values in the '\_AFREQ' columns with 0.__
+```{Python}
+# Impute missing values in '_AFREQ' columns with 0
+nri_subset.update(nri_subset.filter(regex='_AFREQ').fillna(0))
+
+# Preview the data to confirm the changes
+print(nri_subset.head())
+nri_subset.head()
+```
+Missing table: `{Python} missing_df`
 
 ## Task 2 - SVI Data Cleaning
 
